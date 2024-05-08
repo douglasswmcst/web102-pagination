@@ -21,8 +21,10 @@ app.get("/pokemon", async (c) => {
   const count = await prisma.pokemon.count();
 
   const url = "http://localhost:3000/pokemon";
-  // const start = queryOffset + 1;
-  // const end = queryOffset + queryLimit;
+
+  // POINTER 1 = OFFSET + 1
+  // POINTER 2 = OFFSET + LIMIT
+  // MAKE SURE AND TO TAKE INTO ACCOUNT OF NEGATIVE VALUES
   let prevOffset = queryOffset - queryLimit;
 
   if (prevOffset < 0) {
@@ -32,15 +34,23 @@ app.get("/pokemon", async (c) => {
   let next: any = `${url}?limit=${queryLimit}&offset=${
     queryOffset + queryLimit
   }`;
-
+  // THIS IS TO CHECK WE ARE AT THE FIRST RECORD BEING RETURN
   if (queryOffset === 0) {
     previous = null;
   }
+
+  // IF POINTER 2 IS LESS THAN COUNT 
+
+  //   OFFSET = 2    LIMIT = 1   COUNT = 4
+  // 1. WE HAVE HAVE TO CHECK THE REMAING RECORDS TO BE RETURNED
+  //         COUNT - LIMIT- OFFSET
+  // 
   if (queryOffset + queryLimit < count) {
-    next = `${url}?limit=${count - queryLimit}&offset=${
+    next = `${url}?limit=${count - queryLimit - queryOffset}&offset=${
       queryOffset + queryLimit
     }`;
   }
+  // POINTER 2 IS AT COUNT OR MORE THAN COUNT
   if (queryOffset + queryLimit >= count) {
     // queryOffset = count - queryLimit;
     next = null;
